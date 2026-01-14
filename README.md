@@ -42,7 +42,7 @@ A Model Context Protocol (MCP) server that integrates Safaricom's M-PESA Daraja 
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/mboya/daraja-mcp.git
 cd daraja-mcp
 
 # Or if you already have the repository, navigate to it
@@ -1088,7 +1088,7 @@ Contributions are welcome! Please follow these guidelines:
 
 ```bash
 # Clone repo
-git clone https://github.com/yourusername/daraja-mcp.git
+git clone https://github.com/mboya/daraja-mcp.git
 cd daraja-mcp
 
 # Set up environment
@@ -1116,7 +1116,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation:** [developer.safaricom.co.ke/Documentation](https://developer.safaricom.co.ke/Documentation)
 - **Daraja Support:** support@safaricom.co.ke
 - **MCP Documentation:** [modelcontextprotocol.io](https://modelcontextprotocol.io/)
-- **Issues:** [GitHub Issues](https://github.com/yourusername/daraja-mcp/issues)
+- **Issues:** [GitHub Issues](https://github.com/mboya/daraja-mcp/issues)
 
 ## Changelog
 
