@@ -81,7 +81,19 @@ This will install:
 
 ### 4. Configure Environment Variables
 
-Create a `.env` file in the project root directory (see Configuration section below for the template). This is the only file you need to create - all other project files are already included in the repository.
+Create a `.env` file in the project root directory. The repository includes a `.env.example` file as a template.
+
+**Quick Setup:**
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit the .env file with your actual credentials
+# Use your preferred text editor (nano, vim, code, etc.)
+nano .env
+```
+
+Then replace the placeholder values with your actual Daraja API credentials (see [Getting Daraja Credentials](#getting-daraja-credentials) section below).
 
 **Note:** See the "Choosing Between server.py and server_http.py" section below for guidance on which server file to use.
 
@@ -89,8 +101,31 @@ Create a `.env` file in the project root directory (see Configuration section be
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+The repository includes a `.env.example` file with all required environment variables. To set up your environment:
 
+1. **Copy the example file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit the `.env` file** with your actual credentials:
+   ```bash
+   # Using nano
+   nano .env
+   
+   # Or using your preferred editor
+   code .env  # VS Code
+   vim .env   # Vim
+   ```
+
+3. **Replace the placeholder values** with your actual Daraja API credentials:
+   - `DARAJA_CONSUMER_KEY` - Your consumer key from Daraja portal
+   - `DARAJA_CONSUMER_SECRET` - Your consumer secret from Daraja portal
+   - `DARAJA_SHORTCODE` - Your business shortcode (174379 for sandbox)
+   - `DARAJA_PASSKEY` - Your passkey from Daraja portal
+   - `PUBLIC_URL` - Your public callback URL (use ngrok URL for local testing)
+
+**Example `.env` file structure:**
 ```bash
 # Daraja API Credentials
 DARAJA_CONSUMER_KEY=your_consumer_key_here
@@ -107,7 +142,10 @@ CALLBACK_HOST=0.0.0.0
 PUBLIC_URL=http://localhost:3000
 ```
 
-**Important:** Never commit `.env` to version control!
+**Important:** 
+- Never commit `.env` to version control! (It's already in `.gitignore`)
+- The `.env.example` file is safe to commit and serves as a template
+- For production deployments, set environment variables in your hosting platform (Railway, Heroku, etc.)
 
 ### Project Files
 
@@ -119,11 +157,16 @@ The repository already includes all necessary files:
 - `quick_test.py` - Quick validation script
 - `requirements.txt` - Python dependencies (already configured)
 - `.gitignore` - Git ignore rules (already configured)
+- `.env.example` - Environment variables template
 - `Procfile` - Railway deployment configuration
 - `railway.json` - Railway platform settings
 - `README.md` - This documentation
 
-**You only need to create the `.env` file** with your Daraja API credentials (see template above).
+**You only need to create the `.env` file** by copying `.env.example`:
+```bash
+cp .env.example .env
+```
+Then edit `.env` with your actual Daraja API credentials (see Configuration section above).
 
 ## Getting Daraja Credentials
 
