@@ -97,6 +97,183 @@ Then replace the placeholder values with your actual Daraja API credentials (see
 
 **Note:** See the "Choosing Between server.py and server_http.py" section below for guidance on which server file to use.
 
+## How to Run
+
+### Quick Start
+
+Once you've completed the installation and configuration steps above, follow these steps to run the server:
+
+#### 1. Verify Your Setup
+
+```bash
+# Make sure you're in the project directory
+cd daraja-mcp
+
+# Activate virtual environment
+source venv/bin/activate  # macOS/Linux
+# OR
+venv\Scripts\activate     # Windows
+
+# Verify .env file exists
+ls -la .env  # macOS/Linux
+# OR
+dir .env     # Windows
+```
+
+#### 2. Run the Server
+
+**For Local Development with Claude Desktop:**
+```bash
+# Activate virtual environment (if not already activated)
+source venv/bin/activate
+
+# Run the server
+python server.py
+```
+
+**For Production/Cloud Deployment:**
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run with Python (for testing)
+python server_http.py
+
+# OR run with gunicorn (for production)
+gunicorn server_http:app --bind 0.0.0.0:3000 --workers 2
+```
+
+#### 3. Verify Server is Running
+
+**Check the output:**
+You should see:
+```
+🚀 Daraja MCP Server starting...
+📡 Callback server running on 0.0.0.0:3000
+🌐 Public callback URL: http://localhost:3000/mpesa/callback
+🔧 Environment: sandbox
+```
+
+**Test the health endpoint:**
+Open a new terminal and run:
+```bash
+curl http://localhost:3000/health
+```
+
+Expected response:
+```json
+{
+  "status": "healthy",
+  "callback_url": "http://localhost:3000/mpesa/callback",
+  "unread_payments": 0
+}
+```
+
+#### 4. Set Up ngrok (For Local Testing with Real Callbacks)
+
+If you need to receive real M-PESA callbacks during local development:
+
+```bash
+# In a new terminal, start ngrok
+ngrok http 3000
+
+# Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
+# Update your .env file:
+PUBLIC_URL=https://abc123.ngrok.io
+
+# Restart the server
+python server.py
+```
+
+#### 5. Integrate with Claude Desktop
+
+1. Open Claude Desktop settings
+2. Add the MCP server configuration (see [Integrating with Claude Desktop](#integrating-with-claude-desktop) section)
+3. Restart Claude Desktop
+4. Start chatting and use natural language to process payments!
+
+### Running in Different Scenarios
+
+#### Scenario 1: Local Development (No Callbacks Needed)
+```bash
+source venv/bin/activate
+python server.py
+```
+- Use for testing MCP tools locally
+- Callbacks won't work (localhost not accessible from internet)
+- Good for development and debugging
+
+#### Scenario 2: Local Development (With ngrok for Callbacks)
+```bash
+# Terminal 1: Start ngrok
+ngrok http 3000
+
+# Terminal 2: Update .env with ngrok URL, then start server
+source venv/bin/activate
+python server.py
+```
+- Use for testing full payment flow with real callbacks
+- ngrok provides public HTTPS URL
+- Safaricom can reach your callback endpoint
+
+#### Scenario 3: Production Deployment (Railway/Heroku)
+```bash
+# Deploy to Railway (automatic from git push)
+git push origin main
+
+# Or run locally with production settings
+source venv/bin/activate
+gunicorn server_http:app --bind 0.0.0.0:3000 --workers 2
+```
+- Use `server_http.py` for production
+- Railway automatically provides HTTPS
+- No ngrok needed
+
+### Troubleshooting Startup Issues
+
+**"Can't assign requested address":**
+This often happens on macOS when binding to `0.0.0.0`. Use `127.0.0.1` for local development:
+
+```bash
+# In your .env file, set:
+CALLBACK_HOST=127.0.0.1
+```
+
+If `CALLBACK_HOST` is already in `.env` with `0.0.0.0`, change it to `127.0.0.1` or remove the line to use the default. The server will still work with ngrok (ngrok forwards to localhost).
+
+**Port already in use:**
+```bash
+# Check what's using port 3000
+lsof -i :3000  # macOS/Linux
+netstat -ano | findstr :3000  # Windows
+
+# Kill the process or change CALLBACK_PORT in .env
+```
+
+**Missing dependencies:**
+```bash
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+**Environment variables not loading:**
+```bash
+# Verify .env file exists and has correct values
+cat .env
+
+# Test loading
+python -c "from dotenv import load_dotenv; import os; load_dotenv(); print(os.getenv('DARAJA_CONSUMER_KEY'))"
+```
+
+**Server starts but health check fails:**
+```bash
+# Check if Flask callback server is running
+curl http://localhost:3000/health
+
+# Check server logs for errors
+# Look for error messages in the terminal running server.py
+```
+
 ## Configuration
 
 ### Environment Variables
@@ -138,11 +315,12 @@ DARAJA_ENV=sandbox
 
 # Callback Server Configuration
 CALLBACK_PORT=3000
-CALLBACK_HOST=0.0.0.0
+CALLBACK_HOST=127.0.0.1
 PUBLIC_URL=http://localhost:3000
 ```
 
 **Important:** 
+- Use `CALLBACK_HOST=127.0.0.1` for local dev to avoid "Can't assign requested address" on macOS.
 - Never commit `.env` to version control! (It's already in `.gitignore`)
 - The `.env.example` file is safe to commit and serves as a template
 - For production deployments, set environment variables in your hosting platform (Railway, Heroku, etc.)
@@ -711,9 +889,10 @@ Railway is an excellent choice for deploying this MCP server because it:
    DARAJA_PASSKEY=your_passkey
    DARAJA_ENV=sandbox
    CALLBACK_PORT=3000
-   CALLBACK_HOST=0.0.0.0
    PUBLIC_URL=https://your-app-name.railway.app
    ```
+
+   Note: On Railway, the app is served by gunicorn which binds to `0.0.0.0:$PORT` automatically; you don't need to set `CALLBACK_HOST`.
 
 4. **Deploy**
    - Railway will automatically detect `Procfile` and `railway.json`
