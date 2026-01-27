@@ -4,6 +4,7 @@ Provides M-PESA integration tools for Claude with real-time notifications
 """
 
 import os
+import sys
 import json
 import base64
 import requests
@@ -12,6 +13,11 @@ from typing import Any
 import asyncio
 from threading import Thread
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+
+# Load environment variables from .env before any config is read
+load_dotenv()
+
 from mcp.server import Server
 from mcp.types import Tool, TextContent, Resource
 from mcp.server.stdio import stdio_server
@@ -25,7 +31,7 @@ class DarajaConfig:
         self.passkey = os.getenv("DARAJA_PASSKEY", "")
         self.environment = os.getenv("DARAJA_ENV", "sandbox")
         self.callback_port = int(os.getenv("CALLBACK_PORT", "3000"))
-        self.callback_host = os.getenv("CALLBACK_HOST", "0.0.0.0")
+        self.callback_host = os.getenv("CALLBACK_HOST", "localhost")
         self.public_url = os.getenv("PUBLIC_URL", f"http://localhost:{self.callback_port}")
         
         # URLs based on environment
@@ -283,7 +289,12 @@ def create_callback_app(payment_store: PaymentStore):
             "callback_url": config.get_callback_url(),
             "unread_payments": payment_store.get_unread_count()
         }), 200
-    
+
+    @app.route('/favicon.ico', methods=['GET'])
+    def favicon():
+        """Avoid 404 when browsers request favicon"""
+        return "", 204
+
     return app
 
 # Initialize components
@@ -579,4 +590,15 @@ async def main():
         )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Suppress traceback on Ctrl+C so async cancellation doesn't flood the terminal
+    _orig_excepthook = sys.excepthook
+    def _quiet_exit_excepthook(etype, value, tb):
+        if etype is KeyboardInterrupt or etype is asyncio.CancelledError:
+            sys.exit(0)
+        _orig_excepthook(etype, value, tb)
+    sys.excepthook = _quiet_exit_excepthook
+
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        sys.exit(0)
