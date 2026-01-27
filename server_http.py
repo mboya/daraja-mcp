@@ -34,7 +34,7 @@ class DarajaConfig:
         self.environment = os.getenv("DARAJA_ENV", "sandbox")
         self.callback_port = int(os.getenv("CALLBACK_PORT", "3000"))
         self.mcp_port = int(os.getenv("MCP_PORT", "3000"))
-        self.callback_host = os.getenv("CALLBACK_HOST", "0.0.0.0")
+        self.callback_host = os.getenv("CALLBACK_HOST", "127.0.0.1")
         self.public_url = os.getenv("PUBLIC_URL", f"http://localhost:{self.callback_port}")
 
         if self.environment == "production":
@@ -204,6 +204,12 @@ def health():
         "callback_url": config.get_callback_url(),
         "unread_payments": len([p for p in payment_store.payments if not p.get('read', False)])
     }), 200
+
+
+@app.route('/favicon.ico', methods=['GET'])
+def favicon():
+    """Avoid 404 when browsers request favicon"""
+    return "", 204
 
 
 # MCP HTTP Endpoints
