@@ -25,6 +25,7 @@ A Model Context Protocol (MCP) server that integrates Safaricom's M-PESA Daraja 
 - [Troubleshooting](#troubleshooting)
 - [Security Best Practices](#security-best-practices)
 - [Production Deployment](#production-deployment)
+- [Docker](#docker)
 - [API Reference](#api-reference)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1184,6 +1185,16 @@ htop
 # Monitor nginx access
 sudo tail -f /var/log/nginx/access.log
 ```
+
+## Docker
+
+You can run the HTTP MCP server in Docker and push the image to Docker Hub.
+
+- **Build:** `docker build -t YOUR_DOCKERHUB_USERNAME/daraja-mcp:latest .`
+- **Run:** `docker run -p 3000:3000 --env-file .env YOUR_DOCKERHUB_USERNAME/daraja-mcp:latest`
+- **Push:** `docker push YOUR_DOCKERHUB_USERNAME/daraja-mcp:latest`
+
+Full steps (build, run, push to Docker Hub) are in [DOCKER.md](DOCKER.md).
 
 ## API Reference
 
